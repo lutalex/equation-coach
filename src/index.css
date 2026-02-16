@@ -305,15 +305,18 @@ h1 {
 }
 
 .answer-form {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .answer-group {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .answer-label {
@@ -330,6 +333,7 @@ h1 {
   outline: none;
   transition: border 0.2s ease, box-shadow 0.2s ease;
   flex: 1;
+  min-width: 0;
 }
 
 .answer-input:focus {
@@ -357,6 +361,9 @@ h1 {
   cursor: pointer;
   box-shadow: 0 12px 22px rgba(31, 138, 112, 0.25);
   transition: transform 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+  flex-basis: auto;
 }
 
 .submit-btn:hover {
@@ -533,11 +540,16 @@ h1 {
   }
 
   .answer-form {
-    grid-template-columns: 1fr;
+    gap: 8px;
+    justify-content: stretch;
   }
 
   .submit-btn {
+    padding: 12px 18px;
+    font-size: 16px;
+    flex: 0 0 100%;
     width: 100%;
+    align-self: stretch;
   }
 
   .score {
