@@ -1,7 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Rubik:wght@400;600&display=swap");
 
 :root {
-  --bg: #f6f0e6;
   --card: #fffaf2;
   --text: #2f2b25;
   --muted: #6a5f52;
@@ -21,9 +20,7 @@ body {
   min-height: 100vh;
   font-family: "Fredoka", "Rubik", sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at top right, #ffe2b9, transparent 55%),
-    radial-gradient(circle at 10% 20%, #d5f3ec, transparent 50%),
-    linear-gradient(135deg, #f6f0e6 0%, #f3e5d3 55%, #f0d7c3 100%);
+  background: #f7efe2;
 }
 
 #root {
@@ -38,6 +35,191 @@ body {
   padding: 32px 16px 64px;
   position: relative;
   overflow: hidden;
+  transition: background 0.35s ease;
+}
+
+.app::before,
+.app::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+}
+
+.app::before {
+  width: 40vw;
+  min-width: 320px;
+  aspect-ratio: 1 / 1;
+  top: -18vh;
+  left: -10vw;
+  background: var(--app-glow-a);
+  filter: blur(8px);
+  opacity: 0.8;
+}
+
+.app::after {
+  width: 46vw;
+  min-width: 340px;
+  aspect-ratio: 1 / 1;
+  right: -14vw;
+  bottom: -20vh;
+  background: var(--app-glow-b);
+  filter: blur(10px);
+  opacity: 0.75;
+}
+
+.app.bg-default {
+  --app-glow-a: rgba(255, 226, 185, 0.72);
+  --app-glow-b: rgba(213, 243, 236, 0.65);
+  background: linear-gradient(135deg, #f6f0e6 0%, #f3e5d3 55%, #f0d7c3 100%);
+}
+
+.app.bg-newyear {
+  --app-glow-a: rgba(213, 235, 255, 0.68);
+  --app-glow-b: rgba(255, 218, 176, 0.65);
+  background: radial-gradient(circle at 20% 20%, #e7f6ff 0%, transparent 45%),
+    radial-gradient(circle at 85% 15%, #fff3d3 0%, transparent 44%),
+    linear-gradient(130deg, #0f466d 0%, #1e6e95 50%, #6fb0ce 100%);
+}
+
+.app.bg-easter {
+  --app-glow-a: rgba(255, 225, 243, 0.7);
+  --app-glow-b: rgba(227, 241, 184, 0.65);
+  background: radial-gradient(circle at 15% 18%, #ffe9f5 0%, transparent 46%),
+    radial-gradient(circle at 88% 25%, #e8ffd5 0%, transparent 45%),
+    linear-gradient(135deg, #fdf1d3 0%, #f8e7ff 56%, #d6f4fd 100%);
+}
+
+.background-control {
+  position: absolute;
+  top: 20px;
+  right: 18px;
+  z-index: 25;
+  width: min(280px, calc(100vw - 30px));
+}
+
+.background-toggle {
+  width: 100%;
+  border: 2px solid rgba(31, 24, 18, 0.12);
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 14px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Rubik", sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.background-toggle-name {
+  flex: 1;
+  text-align: left;
+}
+
+.caret {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.caret.open {
+  transform: rotate(180deg);
+}
+
+.background-menu {
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 2px solid rgba(31, 24, 18, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 14px 30px rgba(31, 24, 18, 0.16);
+  overflow: hidden;
+}
+
+.background-option {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--text);
+  text-align: left;
+}
+
+.background-option:hover {
+  background: rgba(31, 138, 112, 0.1);
+}
+
+.background-option.active {
+  background: rgba(31, 138, 112, 0.16);
+}
+
+.background-option-name {
+  font-family: "Rubik", sans-serif;
+  font-size: 14px;
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(31, 24, 18, 0.14);
+  margin: 2px 10px;
+}
+
+.open-shop-btn {
+  width: calc(100% - 12px);
+  margin: 8px 6px 6px;
+  border: none;
+  border-radius: 10px;
+  background: #f3ece4;
+  color: var(--text);
+  padding: 10px 12px;
+  font-family: "Rubik", sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.open-shop-btn:hover {
+  background: #ece2d6;
+}
+
+.bg-thumb,
+.shop-thumb {
+  display: inline-block;
+  border-radius: 8px;
+  border: 1px solid rgba(31, 24, 18, 0.14);
+  flex-shrink: 0;
+}
+
+.bg-thumb {
+  width: 38px;
+  height: 26px;
+}
+
+.shop-thumb {
+  width: 72px;
+  height: 52px;
+  border-radius: 12px;
+}
+
+.preview-default {
+  background: radial-gradient(circle at 90% 10%, #ffe2b9, transparent 55%),
+    radial-gradient(circle at 10% 20%, #d5f3ec, transparent 50%),
+    linear-gradient(135deg, #f6f0e6 0%, #f3e5d3 55%, #f0d7c3 100%);
+}
+
+.preview-newyear {
+  background: radial-gradient(circle at 12% 12%, #f2fbff 0%, transparent 35%),
+    radial-gradient(circle at 84% 82%, #ffe7bf 0%, transparent 34%),
+    linear-gradient(132deg, #104766 0%, #2d7ea7 52%, #7ec4e0 100%);
+}
+
+.preview-easter {
+  background: radial-gradient(circle at 22% 20%, #ffe9f5 0%, transparent 38%),
+    radial-gradient(circle at 88% 75%, #e8ffd5 0%, transparent 35%),
+    linear-gradient(130deg, #fdf1d3 0%, #f8e7ff 58%, #d6f4fd 100%);
 }
 
 .card {
@@ -48,6 +230,7 @@ body {
   box-shadow: var(--shadow);
   border: 2px solid rgba(31, 24, 18, 0.05);
   position: relative;
+  z-index: 5;
 }
 
 .header {
@@ -192,12 +375,110 @@ h1 {
   pointer-events: none;
   display: grid;
   gap: 8px;
-  z-index: 10;
+  z-index: 15;
 }
 
 .emoji {
   font-size: 42px;
   animation: float-up-left 1.8s ease forwards;
+}
+
+.shop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(20, 24, 32, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.shop-modal {
+  width: min(760px, 94vw);
+  max-height: 84vh;
+  overflow: auto;
+  background: #fffaf3;
+  border: 2px solid rgba(31, 24, 18, 0.1);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 20px 46px rgba(10, 12, 18, 0.36);
+}
+
+.shop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shop-header h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.shop-close {
+  border: none;
+  background: #efe7db;
+  color: #4a4036;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.shop-balance {
+  margin: 12px 0 14px;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.shop-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.shop-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  border: 2px solid rgba(31, 24, 18, 0.09);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.shop-card h3 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.shop-card p {
+  margin: 0;
+  color: var(--muted);
+  font-family: "Rubik", sans-serif;
+}
+
+.shop-buy-btn {
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-family: "Rubik", sans-serif;
+  padding: 10px 14px;
+  min-width: 122px;
+  cursor: pointer;
+}
+
+.shop-buy-btn:disabled {
+  background: #bdb7af;
+  cursor: not-allowed;
+}
+
+.shop-buy-btn.owned {
+  background: #4b8f6b;
 }
 
 @keyframes shake {
@@ -237,6 +518,16 @@ h1 {
 }
 
 @media (max-width: 640px) {
+  .app {
+    padding-top: 84px;
+  }
+
+  .background-control {
+    top: 14px;
+    right: 10px;
+    width: min(248px, calc(100vw - 20px));
+  }
+
   .card {
     padding: 22px 20px 28px;
   }
@@ -250,6 +541,27 @@ h1 {
   }
 
   .score {
+    width: 100%;
+  }
+
+  .shop-modal {
+    padding: 16px;
+  }
+
+  .shop-header h2 {
+    font-size: 24px;
+  }
+
+  .shop-card {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-thumb {
+    width: 100%;
+    height: 84px;
+  }
+
+  .shop-buy-btn {
     width: 100%;
   }
 }

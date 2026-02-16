@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const MESSAGES = [
   "Отлично получается! Продолжай!",
@@ -6,6 +6,30 @@ const MESSAGES = [
   "Круто! Математика тебе по плечу!",
   "Так держать! Еще чуть-чуть!",
   "Вот это темп! Ты молодец!"
+];
+
+const BACKGROUNDS = [
+  {
+    id: "standard",
+    name: "Стандартный",
+    cost: 0,
+    className: "bg-default",
+    previewClass: "preview-default"
+  },
+  {
+    id: "new-year",
+    name: "Новогодний",
+    cost: 120,
+    className: "bg-newyear",
+    previewClass: "preview-newyear"
+  },
+  {
+    id: "easter",
+    name: "Пасхальный",
+    cost: 90,
+    className: "bg-easter",
+    previewClass: "preview-easter"
+  }
 ];
 
 function randomInt(min, max) {
@@ -75,10 +99,46 @@ export default function App() {
   const [error, setError] = useState(false);
   const [floating, setFloating] = useState([]);
   const [message, setMessage] = useState("");
+  const [ownedBackgroundIds, setOwnedBackgroundIds] = useState(["standard"]);
+  const [activeBackgroundId, setActiveBackgroundId] = useState("standard");
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isShopOpen, setIsShopOpen] = useState(false);
+  const pickerRef = useRef(null);
 
   const pointsColor = useMemo(() => {
     return currentPoints === 10 ? "var(--green)" : "var(--orange)";
   }, [currentPoints]);
+
+  const activeBackground = useMemo(() => {
+    return BACKGROUNDS.find((item) => item.id === activeBackgroundId) ?? BACKGROUNDS[0];
+  }, [activeBackgroundId]);
+
+  const availableBackgrounds = useMemo(() => {
+    return BACKGROUNDS.filter((item) => ownedBackgroundIds.includes(item.id));
+  }, [ownedBackgroundIds]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setIsPickerOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setIsPickerOpen(false);
+        setIsShopOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
 
   const showMessage = (newScore) => {
     if (newScore > 0 && newScore % 50 === 0) {
@@ -141,8 +201,60 @@ export default function App() {
     checkAnswer();
   };
 
+  const openShop = () => {
+    setIsShopOpen(true);
+    setIsPickerOpen(false);
+  };
+
+  const buyBackground = (backgroundId) => {
+    const background = BACKGROUNDS.find((item) => item.id === backgroundId);
+    if (!background) return;
+    if (ownedBackgroundIds.includes(backgroundId)) return;
+    if (score < background.cost) return;
+
+    setScore((prev) => prev - background.cost);
+    setOwnedBackgroundIds((prev) => [...prev, backgroundId]);
+    setActiveBackgroundId(backgroundId);
+    setIsShopOpen(false);
+  };
+
   return (
-    <div className="app">
+    <div className={`app ${activeBackground.className}`}>
+      <div className="background-control" ref={pickerRef}>
+        <button
+          className="background-toggle"
+          type="button"
+          onClick={() => setIsPickerOpen((prev) => !prev)}
+        >
+          <span className={`bg-thumb ${activeBackground.previewClass}`} />
+          <span className="background-toggle-name">{activeBackground.name}</span>
+          <span className={`caret${isPickerOpen ? " open" : ""}`}>▾</span>
+        </button>
+
+        {isPickerOpen && (
+          <div className="background-menu">
+            {availableBackgrounds.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`background-option${item.id === activeBackgroundId ? " active" : ""}`}
+                onClick={() => {
+                  setActiveBackgroundId(item.id);
+                  setIsPickerOpen(false);
+                }}
+              >
+                <span className={`bg-thumb ${item.previewClass}`} />
+                <span className="background-option-name">{item.name}</span>
+              </button>
+            ))}
+            <div className="menu-divider" />
+            <button className="open-shop-btn" type="button" onClick={openShop}>
+              Магазин
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="card">
         <header className="header">
           <div>
@@ -195,6 +307,56 @@ export default function App() {
           </div>
         ))}
       </div>
+
+      {isShopOpen && (
+        <div className="shop-overlay" role="presentation" onClick={() => setIsShopOpen(false)}>
+          <div
+            className="shop-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Магазин фонов"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="shop-header">
+              <h2>Магазин фонов</h2>
+              <button className="shop-close" type="button" onClick={() => setIsShopOpen(false)}>
+                ✕
+              </button>
+            </div>
+            <p className="shop-balance">Ваши баллы: {score}</p>
+
+            <div className="shop-grid">
+              {BACKGROUNDS.map((item) => {
+                const isOwned = ownedBackgroundIds.includes(item.id);
+                const canBuy = score >= item.cost;
+                return (
+                  <article className="shop-card" key={item.id}>
+                    <span className={`shop-thumb ${item.previewClass}`} />
+                    <div>
+                      <h3>{item.name}</h3>
+                      <p>{item.cost === 0 ? "Бесплатно" : `${item.cost} баллов`}</p>
+                    </div>
+                    {isOwned ? (
+                      <button className="shop-buy-btn owned" type="button" disabled>
+                        Куплено
+                      </button>
+                    ) : (
+                      <button
+                        className="shop-buy-btn"
+                        type="button"
+                        disabled={!canBuy}
+                        onClick={() => buyBackground(item.id)}
+                      >
+                        {canBuy ? "Купить" : "Не хватает баллов"}
+                      </button>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
