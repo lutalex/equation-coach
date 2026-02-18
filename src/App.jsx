@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import SnakeGame from "./SnakeGame.jsx";
 
 const MESSAGES = [
   "Отлично получается! Продолжай!",
@@ -90,6 +91,7 @@ function makeId() {
 }
 
 export default function App() {
+  const [pathname, setPathname] = useState(() => window.location.pathname);
   const [equation, setEquation] = useState(() => generateEquation());
   const [answer, setAnswer] = useState("");
   const [attempt, setAttempt] = useState(0);
@@ -117,6 +119,24 @@ export default function App() {
     return BACKGROUNDS.filter((item) => ownedBackgroundIds.includes(item.id));
   }, [ownedBackgroundIds]);
 
+  const hasThreeDigitNumber = useMemo(() => {
+    return /\b\d{3}\b/.test(equation.text);
+  }, [equation.text]);
+
+  const navigateToPath = useCallback((nextPath) => {
+    if (window.location.pathname === nextPath) return;
+    window.history.pushState({}, "", nextPath);
+    setPathname(nextPath);
+  }, []);
+
+  const openSnakeGame = useCallback(() => {
+    navigateToPath("/snake-game");
+  }, [navigateToPath]);
+
+  const returnToEquations = useCallback(() => {
+    navigateToPath("/");
+  }, [navigateToPath]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target)) {
@@ -138,6 +158,15 @@ export default function App() {
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setPathname(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   const showMessage = (newScore) => {
@@ -218,6 +247,15 @@ export default function App() {
     setIsShopOpen(false);
   };
 
+  const handleAnswerLabelClick = () => {
+    if (!hasThreeDigitNumber) return;
+    openSnakeGame();
+  };
+
+  if (pathname === "/snake-game") {
+    return <SnakeGame onExit={returnToEquations} />;
+  }
+
   return (
     <div className={`app ${activeBackground.className}`}>
       <div className="background-control" ref={pickerRef}>
@@ -278,7 +316,15 @@ export default function App() {
 
         <form className="answer-form" onSubmit={handleSubmit}>
           <div className="answer-group">
-            <span className="answer-label">x =</span>
+            <button
+              className={`answer-label answer-label-trigger${hasThreeDigitNumber ? " active" : ""}`}
+              type="button"
+              disabled={!hasThreeDigitNumber}
+              onClick={handleAnswerLabelClick}
+              title={hasThreeDigitNumber ? "Пасхалка: открыть Змейку" : "Пасхалка недоступна"}
+            >
+              x =
+            </button>
             <input
               className={`answer-input${error ? " error" : ""}${shake ? " shake" : ""}`}
               type="text"
