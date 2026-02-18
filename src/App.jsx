@@ -33,6 +33,20 @@ const BACKGROUNDS = [
   }
 ];
 
+const SNAKE_MODES = {
+  CLASSIC: "classic",
+  SPECIAL: "special"
+};
+
+const PROGRESS_STORAGE_KEY = "equation-coach-progress-v1";
+const PROGRESS_TTL_MS = 10 * 60 * 1000;
+const DEFAULT_PROGRESS = {
+  score: 0,
+  ownedBackgroundIds: ["standard"],
+  activeBackgroundId: "standard"
+};
+const VALID_BACKGROUND_IDS = new Set(BACKGROUNDS.map((item) => item.id));
+
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -90,19 +104,78 @@ function makeId() {
   return `${Date.now()}-${Math.random()}`;
 }
 
+function clearStoredProgress() {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.removeItem(PROGRESS_STORAGE_KEY);
+  } catch {
+    // Ignore storage cleanup errors.
+  }
+}
+
+function normalizeOwnedBackgroundIds(value) {
+  const ids = Array.isArray(value) ? value : [];
+  const uniqueKnownIds = Array.from(
+    new Set(ids.filter((id) => typeof id === "string" && VALID_BACKGROUND_IDS.has(id)))
+  );
+
+  if (!uniqueKnownIds.includes("standard")) {
+    uniqueKnownIds.unshift("standard");
+  }
+
+  return uniqueKnownIds;
+}
+
+function getInitialProgress() {
+  if (typeof window === "undefined") return DEFAULT_PROGRESS;
+
+  try {
+    const raw = window.localStorage.getItem(PROGRESS_STORAGE_KEY);
+    if (!raw) return DEFAULT_PROGRESS;
+
+    const parsed = JSON.parse(raw);
+    const savedAt = parsed?.savedAt;
+    const isExpired = typeof savedAt !== "number" || Date.now() - savedAt > PROGRESS_TTL_MS;
+
+    if (isExpired) {
+      clearStoredProgress();
+      return DEFAULT_PROGRESS;
+    }
+
+    const score =
+      typeof parsed?.score === "number" && Number.isFinite(parsed.score) && parsed.score >= 0
+        ? parsed.score
+        : DEFAULT_PROGRESS.score;
+    const ownedBackgroundIds = normalizeOwnedBackgroundIds(parsed?.ownedBackgroundIds);
+    const activeBackgroundId =
+      typeof parsed?.activeBackgroundId === "string" &&
+      ownedBackgroundIds.includes(parsed.activeBackgroundId)
+        ? parsed.activeBackgroundId
+        : DEFAULT_PROGRESS.activeBackgroundId;
+
+    return { score, ownedBackgroundIds, activeBackgroundId };
+  } catch {
+    clearStoredProgress();
+    return DEFAULT_PROGRESS;
+  }
+}
+
 export default function App() {
+  const initialProgress = useMemo(() => getInitialProgress(), []);
   const [pathname, setPathname] = useState(() => window.location.pathname);
+  const [snakeMode, setSnakeMode] = useState(SNAKE_MODES.CLASSIC);
   const [equation, setEquation] = useState(() => generateEquation());
   const [answer, setAnswer] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [currentPoints, setCurrentPoints] = useState(10);
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(initialProgress.score);
   const [shake, setShake] = useState(false);
   const [error, setError] = useState(false);
   const [floating, setFloating] = useState([]);
   const [message, setMessage] = useState("");
-  const [ownedBackgroundIds, setOwnedBackgroundIds] = useState(["standard"]);
-  const [activeBackgroundId, setActiveBackgroundId] = useState("standard");
+  const [ownedBackgroundIds, setOwnedBackgroundIds] = useState(initialProgress.ownedBackgroundIds);
+  const [activeBackgroundId, setActiveBackgroundId] = useState(initialProgress.activeBackgroundId);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isShopOpen, setIsShopOpen] = useState(false);
   const pickerRef = useRef(null);
@@ -168,6 +241,24 @@ export default function App() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      window.localStorage.setItem(
+        PROGRESS_STORAGE_KEY,
+        JSON.stringify({
+          savedAt: Date.now(),
+          score,
+          ownedBackgroundIds,
+          activeBackgroundId
+        })
+      );
+    } catch {
+      // Ignore storage write errors.
+    }
+  }, [score, ownedBackgroundIds, activeBackgroundId]);
 
   const showMessage = (newScore) => {
     if (newScore > 0 && newScore % 50 === 0) {
@@ -249,11 +340,12 @@ export default function App() {
 
   const handleAnswerLabelClick = () => {
     if (!hasThreeDigitNumber) return;
+    setSnakeMode(score >= 100 ? SNAKE_MODES.SPECIAL : SNAKE_MODES.CLASSIC);
     openSnakeGame();
   };
 
   if (pathname === "/snake-game") {
-    return <SnakeGame onExit={returnToEquations} />;
+    return <SnakeGame mode={snakeMode} onExit={returnToEquations} />;
   }
 
   return (

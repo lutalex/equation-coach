@@ -523,6 +523,13 @@ h1 {
   touch-action: none;
 }
 
+.snake-page.special {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255, 237, 176, 0.38) 0%, transparent 38%),
+    radial-gradient(circle at 85% 20%, rgba(143, 236, 255, 0.32) 0%, transparent 36%),
+    linear-gradient(148deg, #1f2234 0%, #20324c 56%, #1f3f4b 100%);
+}
+
 .snake-card {
   width: min(620px, 96vw);
   padding: 20px;
@@ -532,6 +539,10 @@ h1 {
   box-shadow: 0 24px 52px rgba(4, 10, 16, 0.6);
   color: #e9f7ff;
   position: relative;
+}
+
+.snake-page.special .snake-card {
+  border-color: rgba(252, 236, 166, 0.34);
 }
 
 .snake-header {
@@ -578,6 +589,12 @@ h1 {
   color: #9cd3df;
 }
 
+.snake-objective {
+  margin: 0 0 12px;
+  font-family: "Rubik", sans-serif;
+  color: #f4df9e;
+}
+
 .snake-board {
   --snake-grid-size: 16;
   width: min(76vmin, 500px);
@@ -606,8 +623,17 @@ h1 {
   box-shadow: 0 0 9px rgba(108, 237, 133, 0.55);
 }
 
+.snake-cell-wall {
+  background: linear-gradient(145deg, #4f6381 0%, #2b3f5c 100%);
+}
+
 .snake-cell-food {
   background: radial-gradient(circle at 30% 30%, #ffd9e0 0%, #ff678c 58%, #d6144b 100%);
+}
+
+.snake-cell-exit {
+  background: radial-gradient(circle at 35% 35%, #e8ffe6 0%, #7de4a2 58%, #22a957 100%);
+  box-shadow: 0 0 10px rgba(102, 255, 163, 0.55);
 }
 
 .snake-help {
