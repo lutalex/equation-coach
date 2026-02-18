@@ -321,7 +321,6 @@ export default function App() {
               type="button"
               disabled={!hasThreeDigitNumber}
               onClick={handleAnswerLabelClick}
-              title={hasThreeDigitNumber ? "Пасхалка: открыть Змейку" : "Пасхалка недоступна"}
             >
               x =
             </button>
