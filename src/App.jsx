@@ -39,7 +39,6 @@ const SNAKE_MODES = {
 };
 
 const PROGRESS_STORAGE_KEY = "equation-coach-progress-v1";
-const PROGRESS_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_PROGRESS = {
   score: 0,
   ownedBackgroundIds: ["standard"],
@@ -135,13 +134,6 @@ function getInitialProgress() {
     if (!raw) return DEFAULT_PROGRESS;
 
     const parsed = JSON.parse(raw);
-    const savedAt = parsed?.savedAt;
-    const isExpired = typeof savedAt !== "number" || Date.now() - savedAt > PROGRESS_TTL_MS;
-
-    if (isExpired) {
-      clearStoredProgress();
-      return DEFAULT_PROGRESS;
-    }
 
     const score =
       typeof parsed?.score === "number" && Number.isFinite(parsed.score) && parsed.score >= 0
@@ -249,7 +241,6 @@ export default function App() {
       window.localStorage.setItem(
         PROGRESS_STORAGE_KEY,
         JSON.stringify({
-          savedAt: Date.now(),
           score,
           ownedBackgroundIds,
           activeBackgroundId
@@ -432,7 +423,7 @@ export default function App() {
             />
           </div>
           <button className="submit-btn" type="submit">
-            Ещё, плиз!
+            Проверка
           </button>
         </form>
       </div>
